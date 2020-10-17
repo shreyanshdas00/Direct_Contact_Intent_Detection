@@ -133,17 +133,15 @@ class TorchDataset(Dataset):
     instantiate DataLoader which deliveries data batch.
     """
 
-    def __init__(self, text, slot, intent):
+    def __init__(self, text, intent):
         self.__text = text
-        self.__slot = slot
         self.__intent = intent
 
     def __getitem__(self, index):
-        return self.__text[index], self.__slot[index], self.__intent[index]
+        return self.__text[index], self.__intent[index]
 
     def __len__(self):
         # Pre-check to avoid bug.
-        assert len(self.__text) == len(self.__slot)
         assert len(self.__text) == len(self.__intent)
 
         return len(self.__text)
@@ -155,17 +153,14 @@ class DatasetManager(object):
 
         # Instantiate alphabet objects.
         self.__word_alphabet = Alphabet('word', if_use_pad=True, if_use_unk=True)
-        self.__slot_alphabet = Alphabet('slot', if_use_pad=False, if_use_unk=False)
         self.__intent_alphabet = Alphabet('intent', if_use_pad=False, if_use_unk=False)
 
         # Record the raw text of dataset.
         self.__text_word_data = {}
-        self.__text_slot_data = {}
         self.__text_intent_data = {}
 
         # Record the serialization of dataset.
         self.__digit_word_data = {}
-        self.__digit_slot_data = {}
         self.__digit_intent_data = {}
 
         self.__args = args
@@ -177,10 +172,6 @@ class DatasetManager(object):
     @property
     def word_alphabet(self):
         return deepcopy(self.__word_alphabet)
-
-    @property
-    def slot_alphabet(self):
-        return deepcopy(self.__slot_alphabet)
 
     @property
     def intent_alphabet(self):
@@ -210,10 +201,6 @@ class DatasetManager(object):
     def intent_forcing_rate(self):
         return self.__args.intent_forcing_rate
 
-    @property
-    def slot_forcing_rate(self):
-        return self.__args.slot_forcing_rate
-
     def show_summary(self):
         """
         :return: show summary of dataset, training parameters.
@@ -230,7 +217,6 @@ class DatasetManager(object):
         print('\trandom seed:							    {};'.format(self.__args.random_state))
         print('\trate of l2 penalty:					    {};'.format(self.l2_penalty))
         print('\trate of dropout in network:                {};'.format(self.__args.dropout_rate))
-        print('\tteacher forcing rate(slot)		    		{};'.format(self.slot_forcing_rate))
         print('\tteacher forcing rate(intent):		    	{};'.format(self.intent_forcing_rate))
 
         print("\nEnd of parameters show. Save dir: {}.\n\n".format(self.save_dir))
@@ -254,7 +240,6 @@ class DatasetManager(object):
 
         alphabet_dir = os.path.join(self.__args.save_dir, "alphabet")
         self.__word_alphabet.save_content(alphabet_dir)
-        self.__slot_alphabet.save_content(alphabet_dir)
         self.__intent_alphabet.save_content(alphabet_dir)
 
     def get_dataset(self, data_name, is_digital):
@@ -266,30 +251,25 @@ class DatasetManager(object):
 
         if is_digital:
             return self.__digit_word_data[data_name], \
-                   self.__digit_slot_data[data_name], \
                    self.__digit_intent_data[data_name]
         else:
             return self.__text_word_data[data_name], \
-                   self.__text_slot_data[data_name], \
                    self.__text_intent_data[data_name]
 
     def add_file(self, file_path, data_name, if_train_file):
-        text, slot, intent = self.__read_file(file_path)
+        text, intent = self.__read_file(file_path)
 
         if if_train_file:
             self.__word_alphabet.add_instance(text)
-            self.__slot_alphabet.add_instance(slot)
             self.__intent_alphabet.add_instance(intent)
 
         # Record the raw text of dataset.
         self.__text_word_data[data_name] = text
-        self.__text_slot_data[data_name] = slot
         self.__text_intent_data[data_name] = intent
 
         # Serialize raw text and stored it.
         self.__digit_word_data[data_name] = self.__word_alphabet.get_index(text)
         if if_train_file:
-            self.__digit_slot_data[data_name] = self.__slot_alphabet.get_index(slot)
             self.__digit_intent_data[data_name] = self.__intent_alphabet.get_index(intent)
 
     @staticmethod
@@ -299,8 +279,8 @@ class DatasetManager(object):
         :return: list of sentence, list of slot and list of intent.
         """
 
-        texts, slots, intents = [], [], []
-        text, slot = [], []
+        texts, intents = [], []
+        text = []
 
         with open(file_path, 'r') as fr:
             for line in fr.readlines():
@@ -308,17 +288,15 @@ class DatasetManager(object):
 
                 if len(items) == 1:
                     texts.append(text)
-                    slots.append(slot)
                     intents.append(items)
 
                     # clear buffer lists.
-                    text, slot = [], []
+                    text = []
 
                 elif len(items) == 2:
                     text.append(items[0].strip())
-                    slot.append(items[1].strip())
 
-        return texts, slots, intents
+        return texts, intents
 
     def batch_delivery(self, data_name, batch_size=None, is_digital=True, shuffle=True):
         if batch_size is None:
@@ -326,13 +304,11 @@ class DatasetManager(object):
 
         if is_digital:
             text = self.__digit_word_data[data_name]
-            slot = self.__digit_slot_data[data_name]
             intent = self.__digit_intent_data[data_name]
         else:
             text = self.__text_word_data[data_name]
-            slot = self.__text_slot_data[data_name]
             intent = self.__text_intent_data[data_name]
-        dataset = TorchDataset(text, slot, intent)
+        dataset = TorchDataset(text, intent)
 
         return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=self.__collate_fn)
 
