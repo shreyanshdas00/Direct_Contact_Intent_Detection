@@ -9,11 +9,10 @@ from torch.nn.utils.rnn import pad_packed_sequence
 
 class ModelManager(nn.Module):
 
-    def __init__(self, args, num_word, num_slot, num_intent):
+    def __init__(self, args, num_word, num_intent):
         super(ModelManager, self).__init__()
 
         self.__num_word = num_word
-        self.__num_slot = num_slot
         self.__num_intent = num_intent
         self.__args = args
 
@@ -45,14 +44,6 @@ class ModelManager(nn.Module):
             self.__num_intent, self.__args.dropout_rate,
             embedding_dim=self.__args.intent_embedding_dim
         )
-        # Initialize an Decoder object for slot.
-        self.__slot_decoder = LSTMDecoder(
-            self.__args.encoder_hidden_dim + self.__args.attention_output_dim,
-            self.__args.slot_decoder_hidden_dim,
-            self.__num_slot, self.__args.dropout_rate,
-            embedding_dim=self.__args.slot_embedding_dim,
-            extra_dim=self.__num_intent
-        )
 
         # One-hot encoding for augment data feed. 
         self.__intent_embedding = nn.Embedding(
@@ -69,20 +60,17 @@ class ModelManager(nn.Module):
         print('Model parameters are listed as follows:\n')
 
         print('\tnumber of word:                            {};'.format(self.__num_word))
-        print('\tnumber of slot:                            {};'.format(self.__num_slot))
         print('\tnumber of intent:						    {};'.format(self.__num_intent))
         print('\tword embedding dimension:				    {};'.format(self.__args.word_embedding_dim))
         print('\tencoder hidden dimension:				    {};'.format(self.__args.encoder_hidden_dim))
         print('\tdimension of intent embedding:		    	{};'.format(self.__args.intent_embedding_dim))
-        print('\tdimension of slot embedding:			    {};'.format(self.__args.slot_embedding_dim))
-        print('\tdimension of slot decoder hidden:  	    {};'.format(self.__args.slot_decoder_hidden_dim))
         print('\tdimension of intent decoder hidden:        {};'.format(self.__args.intent_decoder_hidden_dim))
         print('\thidden dimension of self-attention:        {};'.format(self.__args.attention_hidden_dim))
         print('\toutput dimension of self-attention:        {};'.format(self.__args.attention_output_dim))
 
         print('\nEnd of parameters show. Now training begins.\n\n')
 
-    def forward(self, text, seq_lens, n_predicts=None, forced_slot=None, forced_intent=None):
+    def forward(self, text, seq_lens, n_predicts=None, forced_intent=None):
         word_tensor, _ = self.__embedding(text)
 
         lstm_hiddens = self.__encoder(word_tensor, seq_lens)
@@ -101,36 +89,12 @@ class ModelManager(nn.Module):
         else:
             feed_intent = pred_intent
 
-        pred_slot = self.__slot_decoder(
-            hiddens, seq_lens,
-            forced_input=forced_slot,
-            extra_input=feed_intent
-        )
-
         if n_predicts is None:
-            return F.log_softmax(pred_slot, dim=1), F.log_softmax(pred_intent, dim=1)
+            return F.log_softmax(pred_intent, dim=1)
         else:
-            _, slot_index = pred_slot.topk(n_predicts, dim=1)
             _, intent_index = pred_intent.topk(n_predicts, dim=1)
 
-            return slot_index.cpu().data.numpy().tolist(), intent_index.cpu().data.numpy().tolist()
-
-    def golden_intent_predict_slot(self, text, seq_lens, golden_intent, n_predicts=1):
-        word_tensor, _ = self.__embedding(text)
-        embed_intent = self.__intent_embedding(golden_intent)
-
-        lstm_hiddens = self.__encoder(word_tensor, seq_lens)
-        attention_hiddens = self.__attention(word_tensor, seq_lens)
-        hiddens = torch.cat([attention_hiddens, lstm_hiddens], dim=1)
-
-        pred_slot = self.__slot_decoder(
-            hiddens, seq_lens, extra_input=embed_intent
-        )
-        _, slot_index = pred_slot.topk(n_predicts, dim=-1)
-
-        # Just predict single slot value.
-        return slot_index.cpu().data.numpy().tolist()
-
+            return intent_index.cpu().data.numpy().tolist()
 
 class EmbeddingCollection(nn.Module):
     """
