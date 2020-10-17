@@ -9,7 +9,7 @@ class BERT():
 
     self.__model.to('cuda')
     
-    return self.get_embedding(self, list_input)
+    return self.get_embedding(list_input)
 
 
   #utility function to extract word embeddings for a given utterance
