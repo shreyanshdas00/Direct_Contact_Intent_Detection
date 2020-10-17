@@ -1,4 +1,5 @@
 #importing the pre-trained BERT embeddings model
+import torch
 from transformers import AutoTokenizer, AutoModelForMaskedLM
 
 class BERT():
