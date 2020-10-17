@@ -9,17 +9,17 @@ model.to('cuda')
 
 
 #utility function to extract word embeddings for a given utterance
-def get_chunk_embedding(list_input):
+def get_embedding(list_input):
   
-  em_cls=[]
+  em_words=[]
   for question in list_input:
     ids=tokenizer.encode(question)
     ids = torch.LongTensor(ids).unsqueeze(0)
-    em_cls.append(ids)
-  sentence_embeddings=[]
+    em_words.append(ids)
+  embeddings=[]
   with torch.no_grad():
-    for x in em_cls:
+    for x in em_words:
       x=x.to(device)
-      sentence_embeddings.append((model(input_ids=x)[2])[-1])
-  return sentence_embeddings
+      embeddings.append((model(input_ids=x)[2])[-1])
+  return embeddings
 
