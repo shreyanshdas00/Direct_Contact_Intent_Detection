@@ -24,7 +24,7 @@ class BERT():
     embeddings=[]
     with torch.no_grad():
       for x in em_words:
-        x=x.to(device)
+        x=x.to('cuda')
         embeddings.append((self.__model(input_ids=x)[2])[-1])
     return embeddings
 
