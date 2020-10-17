@@ -126,7 +126,7 @@ class Processor(object):
             )
 
         intent_acc = Evaluator.accuracy(pred_intent, real_intent)
-        sent_acc = Evaluator.semantic_acc(pred_slot, real_slot, pred_intent, real_intent)
+        sent_acc = Evaluator.semantic_acc(pred_intent, real_intent)
 
         return intent_acc, sent_acc
 
@@ -163,7 +163,7 @@ class Processor(object):
                     fw.write(r_intent + '\t' + p_intent + '\n\n')
 
         intent_acc = Evaluator.accuracy(exp_pred_intent, real_intent)
-        sent_acc = Evaluator.semantic_acc(pred_slot, real_slot, exp_pred_intent, real_intent)
+        sent_acc = Evaluator.semantic_acc(exp_pred_intent, real_intent)
 
         return intent_acc, sent_acc
 
