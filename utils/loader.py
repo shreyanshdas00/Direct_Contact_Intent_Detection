@@ -276,7 +276,7 @@ class DatasetManager(object):
     def __read_file(file_path):
         """ Read data file of given path.
         :param file_path: path of data file.
-        :return: list of sentence, list of slot and list of intent.
+        :return: list of sentence and list of intent.
         """
 
         texts, intents = [], []
