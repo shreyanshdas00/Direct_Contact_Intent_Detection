@@ -25,6 +25,7 @@ class BERT():
     with torch.no_grad():
       for x in em_words:
         x=x.to('cuda')
+        print(len(self.__model(input_ids=x)))
         embeddings.append((self.__model(input_ids=x)[2])[-1])
     return embeddings
 
