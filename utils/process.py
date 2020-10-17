@@ -82,8 +82,8 @@ class Processor(object):
                     total_intent_loss += intent_loss.cpu().data.numpy()[0]
 
             time_con = time.time() - time_start
-            print('[Epoch {:2d}]: The total slot loss on train data is {:2.6f}, intent data is {:2.6f}, cost ' \
-                  'about {:2.6} seconds.'.format(epoch, total_slot_loss, total_intent_loss, time_con))
+            print('[Epoch {:2d}]: The total intent loss on training data is {:2.6f}, cost ' \
+                  'about {:2.6} seconds.'.format(epoch, total_intent_loss, time_con))
 
             change, time_start = False, time.time()
             dev_acc, dev_sent_acc = self.estimate(if_dev=True, test_batch=self.__batch_size)
