@@ -6,7 +6,7 @@ class BERT():
   def __init__(self, list_input):
     self.__tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
-    self.__model = AutoModelForMaskedLM.from_pretrained("bert-base-uncased")
+    self.__model = AutoModelForMaskedLM.from_pretrained("bert-base-uncased", output_hidden_states=True)
 
     self.__model.to('cuda')
     
