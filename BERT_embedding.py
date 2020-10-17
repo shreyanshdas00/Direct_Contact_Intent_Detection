@@ -2,6 +2,28 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForMaskedLM
 
+from transformers import BertModel, BertTokenizer
+PRE_TRAINED_MODEL_NAME = 'bert-base-uncased'
+tokenizer = BertTokenizer.from_pretrained(PRE_TRAINED_MODEL_NAME)
+
+encoding = tokenizer.encode_plus(
+  sample_txt,
+  #max_length=512,
+  #truncation=True,
+  add_special_tokens=True, # Add '[CLS]' and '[SEP]'
+  return_token_type_ids=False,
+  #pad_to_max_length=True,
+  return_attention_mask=True,
+  return_tensors='pt',  # Return PyTorch tensors
+)
+
+bert_model = BertModel.from_pretrained(PRE_TRAINED_MODEL_NAME)
+last_hidden_state, pooled_output = bert_model(
+  input_ids=encoding['input_ids'],
+  attention_mask=encoding['attention_mask']
+)
+print(last_hidden_state.shape)
+
 class BERT():
   def __init__(self, list_input):
     self.__tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
@@ -28,4 +50,5 @@ class BERT():
         print(len(self.__model(input_ids=x)))
         embeddings.append((self.__model(input_ids=x)[2])[-1])
     return embeddings
+ 
 
