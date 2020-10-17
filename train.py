@@ -23,14 +23,11 @@ parser.add_argument("--learning_rate", '-lr', type=float, default=0.001)
 parser.add_argument('--dropout_rate', '-dr', type=float, default=0.4)
 parser.add_argument('--intent_forcing_rate', '-ifr', type=float, default=0.9)
 parser.add_argument("--differentiable", "-d", action="store_true", default=False)
-parser.add_argument('--slot_forcing_rate', '-sfr', type=float, default=0.9)
 
 # model parameters.
 parser.add_argument('--word_embedding_dim', '-wed', type=int, default=64)
 parser.add_argument('--encoder_hidden_dim', '-ehd', type=int, default=256)
 parser.add_argument('--intent_embedding_dim', '-ied', type=int, default=8)
-parser.add_argument('--slot_embedding_dim', '-sed', type=int, default=32)
-parser.add_argument('--slot_decoder_hidden_dim', '-sdhd', type=int, default=64)
 parser.add_argument('--intent_decoder_hidden_dim', '-idhd', type=int, default=64)
 parser.add_argument('--attention_hidden_dim', '-ahd', type=int, default=1024)
 parser.add_argument('--attention_output_dim', '-aod', type=int, default=128)
@@ -67,7 +64,6 @@ if __name__ == "__main__":
     # Instantiate a network model object.
     model = ModelManager(
         args, len(dataset.word_alphabet),
-        len(dataset.slot_alphabet),
         len(dataset.intent_alphabet))
     model.show_summary()
 
