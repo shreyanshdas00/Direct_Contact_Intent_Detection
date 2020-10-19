@@ -27,7 +27,7 @@ parser.add_argument("--differentiable", "-d", action="store_true", default=False
 # model parameters.
 parser.add_argument('--word_embedding_dim', '-wed', type=int, default=768)
 parser.add_argument('--intent_embedding_dim', '-ied', type=int, default=8)
-parser.add_argument('--intent_decoder_hidden_dim', '-idhd', type=int, default=64)
+parser.add_argument('--intent_decoder_hidden_dim', '-idhd', type=int, default=768)
 
 if __name__ == "__main__":
     args = parser.parse_args()
