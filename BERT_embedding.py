@@ -14,11 +14,11 @@ class BERT():
     for utterance in utterances:
       encoding = self.__tokenizer.encode_plus(
       utterance,
-      max_length=512,
+      #max_length=512,
       #truncation=True,
       add_special_tokens=True, # Add '[CLS]' and '[SEP]'
       return_token_type_ids=False,
-      pad_to_max_length= max_length,
+      padding=max_length,
       return_attention_mask=True,
       return_tensors='pt',  # Return PyTorch tensors
       )
