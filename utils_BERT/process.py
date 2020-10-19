@@ -54,7 +54,6 @@ class Processor(object):
                 intent_var = Variable(torch.LongTensor(sorted_intent))
 
                 if torch.cuda.is_available():
-                    text_batch = text_batch.cuda()
                     text_var = text_var.cuda()
                     intent_var = intent_var.cuda()
 
