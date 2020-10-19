@@ -8,7 +8,7 @@ class BERT():
     self.__tokenizer = BertTokenizer.from_pretrained(PRE_TRAINED_MODEL_NAME)
     self.__model = BertModel.from_pretrained(PRE_TRAINED_MODEL_NAME)
 
-  def forward(self, utterance):
+  def __call__(self, utterance):
     encoding = self.__tokenizer.encode_plus(
     utterance,
     #max_length=512,
