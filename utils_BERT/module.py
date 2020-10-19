@@ -161,6 +161,7 @@ class LSTMDecoder(nn.Module):
                         seg_prev_tensor = self.__init_tensor
 
                     # Concatenate forced target tensor.
+                    seg_hiddens = seg_hiddens.unsqueeze(0)
                     seg_hiddens = seg_hiddens.cuda()
                     seg_prev_tensor = seg_prev_tensor.cuda()
                     combined_input = torch.cat([seg_hiddens, seg_prev_tensor], dim=1)
