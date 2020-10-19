@@ -335,11 +335,6 @@ class DatasetManager(object):
 
         for index in sorted_index:
             seq_lens.append(deepcopy(len_list[index]))
-            trans_texts.append(deepcopy(texts[index]))
-            if digital:
-                trans_texts[-1].extend([0] * (max_len - len_list[index]))
-            else:
-                trans_texts[-1].extend(['<PAD>'] * (max_len - len_list[index]))
 
             # This required specific if padding after sorting.
             if items is not None:
