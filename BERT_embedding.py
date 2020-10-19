@@ -10,7 +10,7 @@ class BERT():
 
   def forward(utterance):
     encoding = tokenizer.encode_plus(
-    sample_txt,
+    utterance,
     #max_length=512,
     #truncation=True,
     add_special_tokens=True, # Add '[CLS]' and '[SEP]'
