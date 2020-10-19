@@ -18,7 +18,7 @@ class BERT():
       #truncation=True,
       add_special_tokens=True, # Add '[CLS]' and '[SEP]'
       return_token_type_ids=False,
-      padding=max_length,
+      padding='max_length',
       return_attention_mask=True,
       return_tensors='pt',  # Return PyTorch tensors
       )
