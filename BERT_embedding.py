@@ -23,7 +23,7 @@ class BERT():
     input_ids=encoding['input_ids'],
     attention_mask=encoding['attention_mask']
     )
-    print(last_hidden_state.shape)
+    return last_hidden_state
 
 
 
