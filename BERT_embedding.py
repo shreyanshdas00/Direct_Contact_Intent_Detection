@@ -14,7 +14,7 @@ class BERT():
     for utterance in utterances:
       encoding = self.__tokenizer.encode_plus(
       utterance,
-      #max_length=512,
+      max_length=None,
       #truncation=True,
       add_special_tokens=True, # Add '[CLS]' and '[SEP]'
       return_token_type_ids=False,
