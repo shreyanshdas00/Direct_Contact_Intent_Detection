@@ -63,7 +63,7 @@ class Processor(object):
                         text_var, seq_lens, forced_intent=intent_var
                     )
                 elif random_intent < self.__dataset.intent_forcing_rate:
-                    slot_out, intent_out = self.__model(
+                    intent_out = self.__model(
                         text_var, seq_lens, forced_intent=intent_var
                     )
                 else:
