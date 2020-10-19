@@ -142,7 +142,7 @@ class TorchDataset(Dataset):
 
     def __len__(self):
         # Pre-check to avoid bug.
-        assert len(self.__text) == len(self.__intent)
+        #assert len(self.__text) == len(self.__intent)
 
         return len(self.__text)
 
