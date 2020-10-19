@@ -258,7 +258,9 @@ class DatasetManager(object):
                    self.__text_intent_data[data_name]
 
     def add_file(self, file_path, data_name, if_train_file):
-        text, intent = self.__read_file(file_path)
+        text, text1, intent = self.__read_file(file_path)
+        
+        self.__text = text1
 
         if if_train_file:
             self.__word_alphabet.add_instance(text)
@@ -280,7 +282,7 @@ class DatasetManager(object):
         :return: list of sentence and list of intent.
         """
 
-        texts, intents = [], []
+        texts, texts1, intents = [], [], []
         text = []
         text1=""
 
@@ -292,7 +294,7 @@ class DatasetManager(object):
                 if len(items) == 1:
                     texts.append(text)
                     intents.append(items)
-                    self.__text.append(text1)
+                    texts1.append(text1)
 
                     # clear buffer lists.
                     text = []
@@ -302,7 +304,7 @@ class DatasetManager(object):
                     text.append(items[0].strip())
                     text1+=" "+items1[0]
 
-        return texts, intents
+        return texts, texts1, intents
 
     def batch_delivery(self, data_name, batch_size=None, is_digital=True, shuffle=True):
         if batch_size is None:
