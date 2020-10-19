@@ -154,6 +154,7 @@ class DatasetManager(object):
         # Instantiate alphabet objects.
         self.__word_alphabet = Alphabet('word', if_use_pad=True, if_use_unk=True)
         self.__intent_alphabet = Alphabet('intent', if_use_pad=False, if_use_unk=False)
+        self.__text=[]
 
         # Record the raw text of dataset.
         self.__text_word_data = {}
@@ -281,20 +282,25 @@ class DatasetManager(object):
 
         texts, intents = [], []
         text = []
+        text1=""
 
         with open(file_path, 'r') as fr:
             for line in fr.readlines():
+                items1=line.split()
                 items = line.strip().split()
 
                 if len(items) == 1:
                     texts.append(text)
                     intents.append(items)
+                    self.__text.append(text1)
 
                     # clear buffer lists.
                     text = []
+                    text1 = ""
 
                 elif len(items) == 2:
                     text.append(items[0].strip())
+                    text1+=" "+items1[0]
 
         return texts, intents
 
@@ -308,6 +314,7 @@ class DatasetManager(object):
         else:
             text = self.__text_word_data[data_name]
             intent = self.__text_intent_data[data_name]
+        text = self.__text
         dataset = TorchDataset(text, intent)
 
         return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=self.__collate_fn)
