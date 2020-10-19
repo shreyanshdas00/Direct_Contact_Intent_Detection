@@ -1,0 +1,22 @@
+my self
+number contact_info
+is 0
+9909098090 phone_number
+intent_DC
+
+i self
+live B-address
+in 0
+Texas I-address
+intent_DC
+
+i self
+am 0
+going B-meet
+to 0
+go B-meet
+out I-meet
+for 0
+coffee 0
+tonight meet_time
+intent_Safe
