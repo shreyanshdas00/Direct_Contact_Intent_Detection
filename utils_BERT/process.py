@@ -54,17 +54,18 @@ class Processor(object):
                 intent_var = Variable(torch.LongTensor(sorted_intent))
 
                 if torch.cuda.is_available():
+                    text_batch = text_batch.cuda()
                     text_var = text_var.cuda()
                     intent_var = intent_var.cuda()
 
                 random_intent = random.random()
                 if random_intent < self.__dataset.intent_forcing_rate:
                     intent_out = self.__model(
-                        text_var, seq_lens, forced_intent=intent_var
+                        text_batch, seq_lens, forced_intent=intent_var
                     )
                 elif random_intent < self.__dataset.intent_forcing_rate:
-                    slot_out, intent_out = self.__model(
-                        text_var, seq_lens, forced_intent=intent_var
+                    intent_out = self.__model(
+                        text_batch, seq_lens, forced_intent=intent_var
                     )
                 else:
                     intent_out = self.__model(text_var, seq_lens)
