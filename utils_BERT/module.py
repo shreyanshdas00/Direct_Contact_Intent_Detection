@@ -45,11 +45,8 @@ class ModelManager(nn.Module):
         print('\tnumber of word:                            {};'.format(self.__num_word))
         print('\tnumber of intent:						    {};'.format(self.__num_intent))
         print('\tword embedding dimension:				    {};'.format(self.__args.word_embedding_dim))
-        print('\tencoder hidden dimension:				    {};'.format(self.__args.encoder_hidden_dim))
         print('\tdimension of intent embedding:		    	{};'.format(self.__args.intent_embedding_dim))
         print('\tdimension of intent decoder hidden:        {};'.format(self.__args.intent_decoder_hidden_dim))
-        print('\thidden dimension of self-attention:        {};'.format(self.__args.attention_hidden_dim))
-        print('\toutput dimension of self-attention:        {};'.format(self.__args.attention_output_dim))
 
         print('\nEnd of parameters show. Now training begins.\n\n')
 
