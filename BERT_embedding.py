@@ -3,13 +3,13 @@ import torch
 from transformers import BertModel, BertTokenizer
 
 class BERT():
-  def __init__():
+  def __init__(self):
     PRE_TRAINED_MODEL_NAME = 'bert-base-uncased'
-    tokenizer = BertTokenizer.from_pretrained(PRE_TRAINED_MODEL_NAME)
-    bert_model = BertModel.from_pretrained(PRE_TRAINED_MODEL_NAME)
+    self.__tokenizer = BertTokenizer.from_pretrained(PRE_TRAINED_MODEL_NAME)
+    self.__model = BertModel.from_pretrained(PRE_TRAINED_MODEL_NAME)
 
-  def forward(utterance):
-    encoding = tokenizer.encode_plus(
+  def forward(self, utterance):
+    encoding = self.__tokenizer.encode_plus(
     utterance,
     #max_length=512,
     #truncation=True,
@@ -19,7 +19,7 @@ class BERT():
     return_attention_mask=True,
     return_tensors='pt',  # Return PyTorch tensors
     )
-    last_hidden_state, pooled_output = bert_model(
+    last_hidden_state, pooled_output = self.__model(
     input_ids=encoding['input_ids'],
     attention_mask=encoding['attention_mask']
     )
