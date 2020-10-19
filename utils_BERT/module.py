@@ -5,37 +5,19 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
 from torch.nn.utils.rnn import pad_packed_sequence
+from utils_BERT.BERT import BERT
 
 
 class ModelManager(nn.Module):
 
-    def __init__(self, args, num_word, num_intent):
+    def __init__(self, args, num_intent):
         super(ModelManager, self).__init__()
 
-        self.__num_word = num_word
         self.__num_intent = num_intent
         self.__args = args
 
-        # Initialize an embedding object.
-        self.__embedding = EmbeddingCollection(
-            self.__num_word,
-            self.__args.word_embedding_dim
-        )
-
         # Initialize an LSTM Encoder object.
-        self.__encoder = LSTMEncoder(
-            self.__args.word_embedding_dim,
-            self.__args.encoder_hidden_dim,
-            self.__args.dropout_rate
-        )
-
-        # Initialize an self-attention layer.
-        self.__attention = SelfAttention(
-            self.__args.word_embedding_dim,
-            self.__args.attention_hidden_dim,
-            self.__args.attention_output_dim,
-            self.__args.dropout_rate
-        )
+        self.__encoder = BERT()
 
         # Initialize an Decoder object for intent.
         self.__intent_decoder = LSTMDecoder(
@@ -59,7 +41,6 @@ class ModelManager(nn.Module):
 
         print('Model parameters are listed as follows:\n')
 
-        print('\tnumber of word:                            {};'.format(self.__num_word))
         print('\tnumber of intent:						    {};'.format(self.__num_intent))
         print('\tword embedding dimension:				    {};'.format(self.__args.word_embedding_dim))
         print('\tencoder hidden dimension:				    {};'.format(self.__args.encoder_hidden_dim))
@@ -71,12 +52,7 @@ class ModelManager(nn.Module):
         print('\nEnd of parameters show. Now training begins.\n\n')
 
     def forward(self, text, seq_lens, n_predicts=None, forced_intent=None):
-        word_tensor, _ = self.__embedding(text)
-
-        lstm_hiddens = self.__encoder(word_tensor, seq_lens)
-        # transformer_hiddens = self.__transformer(pos_tensor, seq_lens)
-        attention_hiddens = self.__attention(word_tensor, seq_lens)
-        hiddens = torch.cat([attention_hiddens, lstm_hiddens], dim=1)
+        hiddens = self.__encoder(text)
 
         pred_intent = self.__intent_decoder(
             hiddens, seq_lens,
@@ -95,94 +71,6 @@ class ModelManager(nn.Module):
             _, intent_index = pred_intent.topk(n_predicts, dim=1)
 
             return intent_index.cpu().data.numpy().tolist()
-
-class EmbeddingCollection(nn.Module):
-    """
-    Provide word vector and position vector encoding.
-    """
-
-    def __init__(self, input_dim, embedding_dim, max_len=5000):
-        super(EmbeddingCollection, self).__init__()
-
-        self.__input_dim = input_dim
-        # Here embedding_dim must be an even embedding.
-        self.__embedding_dim = embedding_dim
-        self.__max_len = max_len
-
-        # Word vector encoder.
-        self.__embedding_layer = nn.Embedding(
-            self.__input_dim, self.__embedding_dim
-        )
-
-        # Position vector encoder.
-        # self.__position_layer = torch.zeros(self.__max_len, self.__embedding_dim)
-        # position = torch.arange(0, self.__max_len).unsqueeze(1)
-        # div_term = torch.exp(torch.arange(0, self.__embedding_dim, 2) *
-        #                      (-math.log(10000.0) / self.__embedding_dim))
-
-        # Sine wave curve design.
-        # self.__position_layer[:, 0::2] = torch.sin(position * div_term)
-        # self.__position_layer[:, 1::2] = torch.cos(position * div_term)
-        #
-        # self.__position_layer = self.__position_layer.unsqueeze(0)
-        # self.register_buffer('pe', self.__position_layer)
-
-    def forward(self, input_x):
-        # Get word vector encoding.
-        embedding_x = self.__embedding_layer(input_x)
-
-        # Get position encoding.
-        # position_x = Variable(self.pe[:, :input_x.size(1)], requires_grad=False)
-
-        # Board-casting principle.
-        return embedding_x, embedding_x
-
-
-class LSTMEncoder(nn.Module):
-    """
-    Encoder structure based on bidirectional LSTM.
-    """
-
-    def __init__(self, embedding_dim, hidden_dim, dropout_rate):
-        super(LSTMEncoder, self).__init__()
-
-        # Parameter recording.
-        self.__embedding_dim = embedding_dim
-        self.__hidden_dim = hidden_dim // 2
-        self.__dropout_rate = dropout_rate
-
-        # Network attributes.
-        self.__dropout_layer = nn.Dropout(self.__dropout_rate)
-        self.__lstm_layer = nn.LSTM(
-            input_size=self.__embedding_dim,
-            hidden_size=self.__hidden_dim,
-            batch_first=True,
-            bidirectional=True,
-            dropout=self.__dropout_rate,
-            num_layers=1
-        )
-
-    def forward(self, embedded_text, seq_lens):
-        """ Forward process for LSTM Encoder.
-        (batch_size, max_sent_len)
-        -> (batch_size, max_sent_len, word_dim)
-        -> (batch_size, max_sent_len, hidden_dim)
-        -> (total_word_num, hidden_dim)
-        :param embedded_text: padded and embedded input text.
-        :param seq_lens: is the length of original input text.
-        :return: is encoded word hidden vectors.
-        """
-
-        # Padded_text should be instance of LongTensor.
-        dropout_text = self.__dropout_layer(embedded_text)
-
-        # Pack and Pad process for input of variable length.
-        packed_text = pack_padded_sequence(dropout_text, seq_lens, batch_first=True)
-        lstm_hiddens, (h_last, c_last) = self.__lstm_layer(packed_text)
-        padded_hiddens, _ = pad_packed_sequence(lstm_hiddens, batch_first=True)
-
-        return torch.cat([padded_hiddens[i][:seq_lens[i], :] for i in range(0, len(seq_lens))], dim=0)
-
 
 class LSTMDecoder(nn.Module):
     """
@@ -312,82 +200,3 @@ class LSTMDecoder(nn.Module):
                 sent_start_pos = sent_end_pos
 
         return torch.cat(output_tensor_list, dim=0)
-
-
-class QKVAttention(nn.Module):
-    """
-    Attention mechanism based on Query-Key-Value architecture. And
-    especially, when query == key == value, it's self-attention.
-    """
-
-    def __init__(self, query_dim, key_dim, value_dim, hidden_dim, output_dim, dropout_rate):
-        super(QKVAttention, self).__init__()
-
-        # Record hyper-parameters.
-        self.__query_dim = query_dim
-        self.__key_dim = key_dim
-        self.__value_dim = value_dim
-        self.__hidden_dim = hidden_dim
-        self.__output_dim = output_dim
-        self.__dropout_rate = dropout_rate
-
-        # Declare network structures.
-        self.__query_layer = nn.Linear(self.__query_dim, self.__hidden_dim)
-        self.__key_layer = nn.Linear(self.__key_dim, self.__hidden_dim)
-        self.__value_layer = nn.Linear(self.__value_dim, self.__output_dim)
-        self.__dropout_layer = nn.Dropout(p=self.__dropout_rate)
-
-    def forward(self, input_query, input_key, input_value):
-        """ The forward propagation of attention.
-        Here we require the first dimension of input key
-        and value are equal.
-        :param input_query: is query tensor, (n, d_q)
-        :param input_key:  is key tensor, (m, d_k)
-        :param input_value:  is value tensor, (m, d_v)
-        :return: attention based tensor, (n, d_h)
-        """
-
-        # Linear transform to fine-tune dimension.
-        linear_query = self.__query_layer(input_query)
-        linear_key = self.__key_layer(input_key)
-        linear_value = self.__value_layer(input_value)
-
-        score_tensor = F.softmax(torch.matmul(
-            linear_query,
-            linear_key.transpose(-2, -1)
-        ), dim=-1) / math.sqrt(self.__hidden_dim)
-        forced_tensor = torch.matmul(score_tensor, linear_value)
-        forced_tensor = self.__dropout_layer(forced_tensor)
-
-        return forced_tensor
-
-
-class SelfAttention(nn.Module):
-
-    def __init__(self, input_dim, hidden_dim, output_dim, dropout_rate):
-        super(SelfAttention, self).__init__()
-
-        # Record parameters.
-        self.__input_dim = input_dim
-        self.__hidden_dim = hidden_dim
-        self.__output_dim = output_dim
-        self.__dropout_rate = dropout_rate
-
-        # Record network parameters.
-        self.__dropout_layer = nn.Dropout(self.__dropout_rate)
-        self.__attention_layer = QKVAttention(
-            self.__input_dim, self.__input_dim, self.__input_dim,
-            self.__hidden_dim, self.__output_dim, self.__dropout_rate
-        )
-
-    def forward(self, input_x, seq_lens):
-        dropout_x = self.__dropout_layer(input_x)
-        attention_x = self.__attention_layer(
-            dropout_x, dropout_x, dropout_x
-        )
-
-        flat_x = torch.cat(
-            [attention_x[i][:seq_lens[i], :] for
-             i in range(0, len(seq_lens))], dim=0
-        )
-        return flat_x
