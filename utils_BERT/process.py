@@ -51,7 +51,7 @@ class Processor(object):
                 sorted_intent = [item * num for item, num in zip(sorted_intent, seq_lens)]
                 sorted_intent = list(Evaluator.expand_list(sorted_intent))
 
-                text_var, att_var = bert_tokenizer(padded_text)
+                text_var, att_var = bert_tokenizer.tokenize(padded_text)
 
                 text_var = Variable(torch.LongTensor(text_var))
                 att_var = Variable(torch.LongTensor(att_var))
