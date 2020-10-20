@@ -6,7 +6,7 @@ class BERT():
   def __init__(self):
     PRE_TRAINED_MODEL_NAME = 'bert-base-uncased'
     self.__tokenizer = BertTokenizer.from_pretrained(PRE_TRAINED_MODEL_NAME)
-    self.__model = BertModel.from_pretrained(PRE_TRAINED_MODEL_NAME)
+    self.__model = BertModel.from_pretrained(PRE_TRAINED_MODEL_NAME).cuda()
 
   def __call__(self, input_ids, attention_mask):
     last_hidden_state, pooled_output = self.__model(
@@ -25,7 +25,7 @@ class BERT():
       #truncation=True,
       add_special_tokens=True, # Add '[CLS]' and '[SEP]'
       return_token_type_ids=False,
-      padding='max_length',
+      #padding='max_length',
       return_attention_mask=True,
       return_tensors='pt',  # Return PyTorch tensors
       )
