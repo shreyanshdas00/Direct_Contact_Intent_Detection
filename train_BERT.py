@@ -17,7 +17,7 @@ parser.add_argument('--data_dir', '-dd', type=str, default='data/atis')
 parser.add_argument('--save_dir', '-sd', type=str, default='save')
 parser.add_argument("--random_state", '-rs', type=int, default=0)
 parser.add_argument('--num_epoch', '-ne', type=int, default=300)
-parser.add_argument('--batch_size', '-bs', type=int, default=8)
+parser.add_argument('--batch_size', '-bs', type=int, default=16)
 parser.add_argument('--l2_penalty', '-lp', type=float, default=1e-6)
 parser.add_argument("--learning_rate", '-lr', type=float, default=0.001)
 parser.add_argument('--dropout_rate', '-dr', type=float, default=0.4)
@@ -26,8 +26,11 @@ parser.add_argument("--differentiable", "-d", action="store_true", default=False
 
 # model parameters.
 parser.add_argument('--word_embedding_dim', '-wed', type=int, default=768)
+parser.add_argument('--encoder_hidden_dim', '-ehd', type=int, default=256)
 parser.add_argument('--intent_embedding_dim', '-ied', type=int, default=8)
 parser.add_argument('--intent_decoder_hidden_dim', '-idhd', type=int, default=768)
+parser.add_argument('--attention_hidden_dim', '-ahd', type=int, default=1024)
+parser.add_argument('--attention_output_dim', '-aod', type=int, default=128)
 
 if __name__ == "__main__":
     args = parser.parse_args()
