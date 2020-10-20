@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
 from torch.nn.utils.rnn import pad_packed_sequence
-from utlis_BERT.BERT import BERT
+from utils_BERT.BERT import BERT
 
 class ModelManager(nn.Module):
 
