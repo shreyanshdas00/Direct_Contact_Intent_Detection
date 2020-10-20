@@ -51,6 +51,7 @@ class Processor(object):
                 sorted_intent = list(Evaluator.expand_list(sorted_intent))
 
                 text_var = Variable(torch.LongTensor(padded_text))
+                print(text_var)
                 intent_var = Variable(torch.LongTensor(sorted_intent))
 
                 if torch.cuda.is_available():
