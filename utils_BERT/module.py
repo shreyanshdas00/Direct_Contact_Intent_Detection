@@ -55,7 +55,6 @@ class ModelManager(nn.Module):
     def forward(self, text, attention, seq_lens, n_predicts=None, forced_intent=None):
 
         hiddens = self.__encoder(text, attention)
-
         pred_intent = self.__intent_decoder(
             hiddens, seq_lens,
             forced_input=forced_intent
@@ -116,7 +115,6 @@ class LSTMDecoder(nn.Module):
             lstm_input_dim = self.__input_dim + self.__embedding_dim
         else:
             lstm_input_dim = self.__input_dim
-
         # Network parameter definition.
         self.__dropout_layer = nn.Dropout(self.__dropout_rate)
         self.__lstm_layer = nn.LSTM(
@@ -163,6 +161,9 @@ class LSTMDecoder(nn.Module):
                         seg_prev_tensor = torch.cat([self.__init_tensor, seg_forced_tensor[:-1, :]], dim=0)
                     else:
                         seg_prev_tensor = self.__init_tensor
+
+                    print(seg_hiddens.shape,seg_prev_tensor.shape)
+                    input("HI")
 
                     # Concatenate forced target tensor.
                     combined_input = torch.cat([seg_hiddens, seg_prev_tensor], dim=1)
