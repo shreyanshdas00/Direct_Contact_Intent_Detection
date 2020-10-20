@@ -52,6 +52,7 @@ class Processor(object):
 
                 text_var = Variable(torch.LongTensor(padded_text))
                 intent_var = Variable(torch.LongTensor(sorted_intent))
+                print(intent_var)
 
                 if torch.cuda.is_available():
                     text_var = text_var.cuda()
