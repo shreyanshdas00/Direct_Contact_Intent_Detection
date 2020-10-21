@@ -200,7 +200,7 @@ class Processor(object):
                 var_text = var_text.cuda()
                 att_var = att_var.cuda()
 
-            intent_idx = model(var_text, attn_text, seq_lens, n_predicts=1)
+            intent_idx = model(var_text, att_var, seq_lens, n_predicts=1)
             nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
             pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
 
