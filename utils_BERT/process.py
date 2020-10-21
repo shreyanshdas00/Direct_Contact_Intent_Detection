@@ -186,19 +186,21 @@ class Processor(object):
         pred_intent, real_intent = [], []
 
         for text_batch, intent_batch in tqdm(dataloader, ncols=50):
+            bert_tokenizer = BERT()
             padded_text, [sorted_intent], seq_lens = dataset.add_padding(
                 text_batch, [(intent_batch, False)], digital=False
             )
 
             real_intent.extend(list(Evaluator.expand_list(sorted_intent)))
-
-            digit_text = dataset.word_alphabet.get_index(padded_text)
-            var_text = Variable(torch.LongTensor(digit_text))
+            var_text, att_var = bert_tokenizer.tokenize(padded_text)
+            var_text = Variable(torch.LongTensor(var_text))
+            att_var = Variable(torch.LongTensor(att_var))
 
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
+                att_var = att_var.cuda()
 
-            intent_idx = model(var_text, seq_lens, n_predicts=1)
+            intent_idx = model(var_text, attn_text, seq_lens, n_predicts=1)
             nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
             pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
 
