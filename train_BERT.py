@@ -17,7 +17,7 @@ parser.add_argument('--data_dir', '-dd', type=str, default='Direct_Contact_Inten
 parser.add_argument('--save_dir', '-sd', type=str, default='save')
 parser.add_argument("--random_state", '-rs', type=int, default=0)
 parser.add_argument('--num_epoch', '-ne', type=int, default=300)
-parser.add_argument('--batch_size', '-bs', type=int, default=8)
+parser.add_argument('--batch_size', '-bs', type=int, default=16)
 parser.add_argument('--l2_penalty', '-lp', type=float, default=1e-6)
 parser.add_argument("--learning_rate", '-lr', type=float, default=0.001)
 parser.add_argument('--dropout_rate', '-dr', type=float, default=0.4)
