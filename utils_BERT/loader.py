@@ -284,7 +284,7 @@ class DatasetManager(object):
 
         with open(file_path, 'r') as fr:
             for line in fr.readlines():
-                items = line.strip().split()
+                items = line.split()
 
                 if len(items) == 1:
                     texts.append(text)
@@ -294,7 +294,7 @@ class DatasetManager(object):
                     text = []
 
                 elif len(items) == 2:
-                    text.append(items[0].strip())
+                    text.append(items[0])
 
         return texts, intents
 
