@@ -327,11 +327,11 @@ class DatasetManager(object):
                         text.append(items[0].strip())
         else:
             with open(file_path, 'r') as fr:
-            for line in fr.readlines():
-                items = line.strip().split()
-                for item in items:
-	                texts.append([item.strip()])
-                    intents.append("i_un")
+            	for line in fr.readlines():
+                	items = line.strip().split()
+                	for item in items:
+	                	texts.append([item.strip()])
+                    		intents.append("i_un")
 
         return texts, intents
 
