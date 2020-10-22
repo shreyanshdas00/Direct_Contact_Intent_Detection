@@ -139,6 +139,12 @@ class DatasetManager(object):
         else:
             return self.__text_word_data[data_name]
 
+    def quick_build(self):
+        """
+        Convenient function to instantiate a dataset object.
+        """
+        self.add_file(self.__args.data_dir, 'predict', if_train_file=False)
+
     def add_file(self, file_path, data_name, if_train_file):
         text, intent = self.__read_file(file_path)
 
