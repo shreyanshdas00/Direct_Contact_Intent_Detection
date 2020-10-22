@@ -25,7 +25,6 @@ class Processor(object):
 
             time_con = time.time() - time_start
             print("The model has been loaded into GPU and cost {:.6f} seconds.\n".format(time_con))
-        )
 
     @staticmethod
     def validate(model_path, dataset_path, batch_size):
