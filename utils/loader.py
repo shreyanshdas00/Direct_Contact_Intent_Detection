@@ -119,6 +119,34 @@ class Alphabet(object):
         with open(dict_path, 'w') as fw:
             for index, element in enumerate(self.__index2instance):
                 fw.write(element + '\t' + str(index) + '\n')
+                
+    def load_content(self, dir_path):
+        """ Save the content of alphabet to files.
+        There are two kinds of saved files:
+            1, The first is a list file, elements are
+            sorted by the frequency of occurrence.
+            2, The second is a dictionary file, elements
+            are sorted by it serialized index.
+        :param dir_path: is the directory path to save object.
+        """
+
+        # Check if dir_path exists.
+        if not os.path.exists(dir_path):
+            raise Exception("Path does not exist.")
+
+        list_path = os.path.join(dir_path, self.__name + "_list.txt")
+        with open(list_path, 'r') as fr:
+            for line in fr.readlines():
+                items = line.split()
+                self.__counter[items[0]] = int(items[1])
+
+        dict_path = os.path.join(dir_path, self.__name + "_dict.txt")
+        with open(dict_path, 'r') as fr:
+            for line in fr.readlines():
+                items = line.split()
+                self.__instance2index[items[0]] = int(items[1])
+                self.__index2instance.append(items[0])
+
 
     def __len__(self):
         return len(self.__index2instance)
@@ -221,26 +249,29 @@ class DatasetManager(object):
 
         print("\nEnd of parameters show. Save dir: {}.\n\n".format(self.save_dir))
 
-    def quick_build(self):
+    def quick_build(self, mode=0):
         """
         Convenient function to instantiate a dataset object.
         """
+        if mode==0:
+            train_path = os.path.join(self.__args.data_dir, 'train.txt')
+            dev_path = os.path.join(self.__args.data_dir, 'dev.txt')
+            test_path = os.path.join(self.__args.data_dir, 'test.txt')
 
-        train_path = os.path.join(self.__args.data_dir, 'train.txt')
-        dev_path = os.path.join(self.__args.data_dir, 'dev.txt')
-        test_path = os.path.join(self.__args.data_dir, 'test.txt')
+            self.add_file(train_path, 'train', if_train_file=True)
+            self.add_file(dev_path, 'dev', if_train_file=False)
+            self.add_file(test_path, 'test', if_train_file=False)
 
-        self.add_file(train_path, 'train', if_train_file=True)
-        self.add_file(dev_path, 'dev', if_train_file=False)
-        self.add_file(test_path, 'test', if_train_file=False)
+            # Check if save path exists.
+            if not os.path.exists(self.save_dir):
+                os.mkdir(self.save_dir)
 
-        # Check if save path exists.
-        if not os.path.exists(self.save_dir):
-            os.mkdir(self.save_dir)
-
-        alphabet_dir = os.path.join(self.__args.save_dir, "alphabet")
-        self.__word_alphabet.save_content(alphabet_dir)
-        self.__intent_alphabet.save_content(alphabet_dir)
+            alphabet_dir = os.path.join(self.__args.save_dir, "alphabet")
+            self.__word_alphabet.save_content(alphabet_dir)
+            self.__intent_alphabet.save_content(alphabet_dir)
+            
+        else:
+            self.add_file(self.__args.data_dir, 'utterance', if_train_file=False, mode)
 
     def get_dataset(self, data_name, is_digital):
         """ Get dataset of given unique name.
@@ -256,8 +287,8 @@ class DatasetManager(object):
             return self.__text_word_data[data_name], \
                    self.__text_intent_data[data_name]
 
-    def add_file(self, file_path, data_name, if_train_file):
-        text, intent = self.__read_file(file_path)
+    def add_file(self, file_path, data_name, if_train_file, mode=0):
+        text, intent = self.__read_file(file_path, mode)
 
         if if_train_file:
             self.__word_alphabet.add_instance(text)
@@ -273,28 +304,34 @@ class DatasetManager(object):
             self.__digit_intent_data[data_name] = self.__intent_alphabet.get_index(intent)
 
     @staticmethod
-    def __read_file(file_path):
+    def __read_file(file_path, mode):
         """ Read data file of given path.
         :param file_path: path of data file.
         :return: list of sentence and list of intent.
         """
-
         texts, intents = [], []
         text = []
+        if mode==0:
+            with open(file_path, 'r') as fr:
+                for line in fr.readlines():
+                    items = line.strip().split()
 
-        with open(file_path, 'r') as fr:
+                    if len(items) == 1:
+                        texts.append(text)
+                        intents.append(items)
+
+                        # clear buffer lists.
+                        text = []
+
+                    elif len(items) == 2:
+                        text.append(items[0].strip())
+        else:
+            with open(file_path, 'r') as fr:
             for line in fr.readlines():
                 items = line.strip().split()
-
-                if len(items) == 1:
-                    texts.append(text)
-                    intents.append(items)
-
-                    # clear buffer lists.
-                    text = []
-
-                elif len(items) == 2:
-                    text.append(items[0].strip())
+                for item in items:
+	                texts.append([item.strip()])
+                    intents.append("i_un")
 
         return texts, intents
 
