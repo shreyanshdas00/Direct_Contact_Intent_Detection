@@ -26,42 +26,20 @@ class Processor(object):
             time_con = time.time() - time_start
             print("The model has been loaded into GPU and cost {:.6f} seconds.\n".format(time_con))
     @staticmethod
-    def validate(model_path, dataset_path, batch_size):
+    def validate(model_path, dataset, batch_size):
         """
         validation will write mistaken samples to files and make scores.
         """
 
         model = torch.load(model_path)
-        dataset = torch.load(dataset_path)
 
         # Get the sentence list in test dataset.
-        sent_list = dataset.test_sentence
+        #sent_list = dataset.test_sentence
 
         exp_pred_intent, real_intent, pred_intent = Processor.prediction(
-            model, dataset, "test", batch_size
+            model, dataset, "utterance", batch_size
         )
         print(exp_pred_intent, real_intent, pred_intent)
-
-        # To make sure the directory for save error prediction.
-        mistake_dir = os.path.join(dataset.save_dir, "error")
-        if not os.path.exists(mistake_dir):
-            os.mkdir(mistake_dir)
-
-        intent_file_path = os.path.join(mistake_dir, "intent.txt")
-        both_file_path = os.path.join(mistake_dir, "both.txt")
-
-        # Write those sample with mistaken intent prediction.
-        with open(intent_file_path, 'w') as fw:
-            for w_list, p_intent_list, r_intent, p_intent in zip(sent_list, pred_intent, real_intent, exp_pred_intent):
-                if p_intent != r_intent:
-                    for w, p in zip(w_list, p_intent_list):
-                        fw.write(w + '\t' + p + '\n')
-                    fw.write(r_intent + '\t' + p_intent + '\n\n')
-
-        intent_acc = Evaluator.accuracy(exp_pred_intent, real_intent)
-        sent_acc = Evaluator.semantic_acc(exp_pred_intent, real_intent)
-
-        return intent_acc, sent_acc
 
     @staticmethod
     def prediction(model, dataset, mode, batch_size):
@@ -71,6 +49,8 @@ class Processor(object):
             dataloader = dataset.batch_delivery('dev', batch_size=batch_size, shuffle=False, is_digital=False)
         elif mode == "test":
             dataloader = dataset.batch_delivery('test', batch_size=batch_size, shuffle=False, is_digital=False)
+        elif mode == "utterance":
+            dataloader = dataset.batch_delivery('utterance', batch_size=batch_size, shuffle=False, is_digital=False)
         else:
             raise Exception("Argument error! mode belongs to {\"dev\", \"test\"}.")
             
@@ -89,7 +69,9 @@ class Processor(object):
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
 
-            intent_idx = model(var_text, seq_lens, n_predicts=1)
+            intent_idx = model(var_text)
+            print(intent_idx)
+            input()
             nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
             pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
 
