@@ -329,7 +329,7 @@ class DatasetManager(object):
                     elif len(items) == 2:
                         text.append(items[0].strip())
         else:
-          items = file_path.strip.split()
+          items = file_path.strip().split()
           for item in items:
               texts.append([item.strip()])
               intents.append("i_un")
