@@ -59,7 +59,6 @@ if __name__ == "__main__":
     # Instantiate a dataset object.
     dataset = DatasetManager(args)
     dataset.quick_build(mode=1)
-    dataset.show_summary()
 
     # Instantiate a network model object.
     model = ModelManager(
