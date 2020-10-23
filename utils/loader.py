@@ -329,12 +329,10 @@ class DatasetManager(object):
                     elif len(items) == 2:
                         text.append(items[0].strip())
         else:
-          with open(file_path, 'r') as fr:
-            for line in fr.readlines():
-              items = line.strip().split()
-              for item in items:
-                texts.append([item.strip()])
-                intents.append("i_un")
+          items = file_path.strip.split()
+          for item in items:
+              texts.append([item.strip()])
+              intents.append("i_un")
 
         return texts, intents
 
