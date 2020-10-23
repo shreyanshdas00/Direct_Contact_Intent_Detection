@@ -271,7 +271,10 @@ class DatasetManager(object):
             self.__intent_alphabet.save_content(alphabet_dir)
             
         else:
-            self.add_file(self.__args.data_dir, 'utterance', if_train_file=False, mode)
+            alphabet_dir = os.path.join(self.__args.save_dir, "alphabet")
+            self.__word_alphabet.load_content(alphabet_dir)
+            self.__intent_alphabet.load_content(alphabet_dir)
+	    self.add_file(self.__args.data_dir, 'utterance', if_train_file=False, mode)
 
     def get_dataset(self, data_name, is_digital):
         """ Get dataset of given unique name.
