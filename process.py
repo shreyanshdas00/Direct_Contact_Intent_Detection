@@ -77,8 +77,8 @@ class Processor(object):
         pred_intent, real_intent = [], []
 
         for text_batch, intent_batch in tqdm(dataloader, ncols=50):
-            padded_text, seq_lens = dataset.add_padding(
-                text_batch, digital=False
+            padded_text, [sorted_intent], seq_lens = dataset.add_padding(
+                text_batch, [(intent_batch, False)], digital=False
             )
 
             real_intent.extend(list(Evaluator.expand_list(sorted_intent)))
