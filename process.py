@@ -69,7 +69,7 @@ class Processor(object):
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
 
-            intent_idx = model(var_text)
+            intent_idx = model(var_text, seq_lens)
             print(intent_idx)
             input()
             nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
