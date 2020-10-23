@@ -69,5 +69,5 @@ if __name__ == "__main__":
     # To train and evaluate the models.
     process = Processor(dataset, model, args.batch_size)
 
-    x, y = Processor.validate(os.path.join(args.save_dir, "model/model.pkl"),dataset,args.batch_size) 
-    print(x, y)
+    Processor.validate(os.path.join(args.save_dir, "model/model.pkl"),dataset,args.batch_size) 
+    
