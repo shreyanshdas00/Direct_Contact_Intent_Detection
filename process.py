@@ -69,12 +69,13 @@ class Processor(object):
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
 
-            intent_idx = model(var_text, seq_lens)
-            print(intent_idx)
-            input()
+            intent_idx = model(var_text, seq_lens, n_predicts=1)
+            #intent_idx = torch.argmax(intent_idx)
+            #print(intent_idx)
+            #input()
             nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
             pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
-
+        
         exp_pred_intent = Evaluator.max_freq_predict(pred_intent)
         return exp_pred_intent, real_intent, pred_intent
 
@@ -90,6 +91,9 @@ class Evaluator(object):
         predict = []
         for items in sample:
             predict.append(Counter(items).most_common(1)[0][0])
+            
+        print(predict)
+        input()
         return predict
 
     @staticmethod
