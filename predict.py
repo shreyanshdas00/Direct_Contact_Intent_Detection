@@ -13,7 +13,7 @@ import numpy as np
 parser = argparse.ArgumentParser()
 
 # Training parameters.
-parser.add_argument('--data_dir', '-dd', type=str, default='data/atis')
+parser.add_argument('--data_dir', '-dd', type=str, default='')
 parser.add_argument('--save_dir', '-sd', type=str, default='save')
 parser.add_argument("--random_state", '-rs', type=int, default=0)
 parser.add_argument('--num_epoch', '-ne', type=int, default=300)
