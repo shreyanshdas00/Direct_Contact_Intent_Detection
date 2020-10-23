@@ -36,25 +36,22 @@ class Processor(object):
         # Get the sentence list in test dataset.
         #sent_list = dataset.test_sentence
 
-        exp_pred_intent, real_intent, pred_intent = Processor.prediction(
+        real_intent, pred_intent = Processor.prediction(
             model, dataset, "utterance", batch_size
         )
-        print(exp_pred_intent, real_intent, pred_intent)
+        print(real_intent, pred_intent)
 
     @staticmethod
     def prediction(model, dataset, mode, batch_size):
         model.eval()
 
-        if mode == "dev":
-            dataloader = dataset.batch_delivery('dev', batch_size=batch_size, shuffle=False, is_digital=False)
-        elif mode == "test":
-            dataloader = dataset.batch_delivery('test', batch_size=batch_size, shuffle=False, is_digital=False)
-        elif mode == "utterance":
+        if mode == "utterance":
             dataloader = dataset.batch_delivery('utterance', batch_size=batch_size, shuffle=False, is_digital=False)
         else:
             raise Exception("Argument error! mode belongs to {\"dev\", \"test\"}.")
             
-        pred_intent, real_intent = [], []
+        pred_intent, real_intent = 0, []
+        num_of_words = 0
 
         for text_batch, intent_batch in tqdm(dataloader, ncols=50):
             padded_text, [sorted_intent], seq_lens = dataset.add_padding(
@@ -69,15 +66,16 @@ class Processor(object):
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
 
-            intent_idx = model(var_text, seq_lens, n_predicts=1)
+            intent_idx = model(var_text, seq_lens)
+            print(intent_idx)
+            input()
             #intent_idx = torch.argmax(intent_idx)
-            #print(intent_idx)
-            #input()
-            nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
-            pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
+            pred_intent+=intent_idx
+            num_of_words +=1
+        pred_intent = pred_intent
+        print(pred_intent,num_of_words)
         
-        exp_pred_intent = Evaluator.max_freq_predict(pred_intent)
-        return exp_pred_intent, real_intent, pred_intent
+        return real_intent, pred_intent
 
 
 class Evaluator(object):
