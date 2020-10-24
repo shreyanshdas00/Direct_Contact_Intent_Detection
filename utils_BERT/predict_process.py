@@ -9,7 +9,7 @@ import random
 import numpy as np
 from tqdm import tqdm
 from collections import Counter
-
+from utils_BERT.BERT import BERT
 
 
 class Processor(object):
