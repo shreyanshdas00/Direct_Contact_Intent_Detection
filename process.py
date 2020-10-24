@@ -36,10 +36,10 @@ class Processor(object):
         # Get the sentence list in test dataset.
         #sent_list = dataset.test_sentence
 
-        real_intent, pred_intent = Processor.prediction(
+        confidence, pred_intent = Processor.prediction(
             model, dataset, "utterance", batch_size
         )
-        print(real_intent, pred_intent)
+        return confidence, pred_intent
 
     @staticmethod
     def prediction(model, dataset, mode, batch_size):
@@ -67,44 +67,17 @@ class Processor(object):
                 var_text = var_text.cuda()
 
             intent_idx = model(var_text, seq_lens)
-            print(intent_idx)
-            input()
-            #intent_idx = torch.argmax(intent_idx)
+            intent_idx = torch.exp(intent_idx)
             pred_intent+=intent_idx
             num_of_words +=1
-        pred_intent = pred_intent
-        print(pred_intent,num_of_words)
-        
-        return real_intent, pred_intent
+        pred_intent = (pred_intent/num_of_words).squeeze(0)
+        confidence, pred_intent = pred_intent.max(0,keepdims=False)
+        pred_intent = dataset.intent_alphabet.get_instance(int(pred_intent))
+        return float(confidence*100), pred_intent
+        #return real_intent, pred_intent
 
 
 class Evaluator(object):
-
-    """
-    Max frequency prediction. 
-    """
-
-    @staticmethod
-    def max_freq_predict(sample):
-        predict = []
-        for items in sample:
-            predict.append(Counter(items).most_common(1)[0][0])
-            
-        print(predict)
-        input()
-        return predict
-
-    @staticmethod
-    def exp_decay_predict(sample, decay_rate=0.8):
-        predict = []
-        for items in sample:
-            item_dict = {}
-            curr_weight = 1.0
-            for item in items[::-1]:
-                item_dict[item] = item_dict.get(item, 0) + curr_weight
-                curr_weight *= decay_rate
-            predict.append(sorted(item_dict.items(), key=lambda x_: x_[1])[-1][0])
-        return predict
 
     @staticmethod
     def expand_list(nested_list):
@@ -114,16 +87,3 @@ class Evaluator(object):
                     yield sub_item
             else:
                 yield item
-
-    @staticmethod
-    def nested_list(items, seq_lens):
-        num_items = len(items)
-        trans_items = [[] for _ in range(0, num_items)]
-
-        count = 0
-        for jdx in range(0, len(seq_lens)):
-            for idx in range(0, num_items):
-                trans_items[idx].append(items[idx][count:count + seq_lens[jdx]])
-            count += seq_lens[jdx]
-
-        return trans_items
