@@ -64,7 +64,6 @@ if __name__ == "__main__":
     model = ModelManager(
         args, len(dataset.word_alphabet),
         len(dataset.intent_alphabet))
-    model.show_summary()
 
     # To train and evaluate the models.
     process = Processor(dataset, model, args.batch_size)
