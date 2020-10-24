@@ -1,3 +1,254 @@
 add sabrina salerno to the grime instrumentals playlist 
+AddToPlaylist
+
 i want to bring four people to a place that s close to downtown that serves churrascaria cuisine 
+BookRestaurant
+
 put lindsey cardinale into my hillary clinton s women s history month playlist 
+AddToPlaylist
+
+will it snow in mt on june 13 2038 
+GetWeather
+
+play signe anderson chant music that is newest 
+PlayMusic
+
+can O
+you O
+let O
+me O
+know O
+what O
+animated B-movie_type
+movies I-movie_type
+are O
+playing O
+close B-spatial_relation
+by I-spatial_relation
+SearchScreeningEvent
+
+can O
+you O
+get O
+me O
+reservations O
+for O
+a O
+highly B-sort
+rated I-sort
+restaurant B-restaurant_type
+in O
+seychelles B-country
+BookRestaurant
+
+what O
+s O
+the O
+weather O
+here B-current_location
+on O
+2/7/2021 B-timeRange
+GetWeather
+
+find O
+worldly B-movie_name
+goods I-movie_name
+starting O
+now B-timeRange
+at O
+a O
+movie B-object_location_type
+house I-object_location_type
+SearchScreeningEvent
+
+on O
+june B-timeRange
+27 I-timeRange
+2026 I-timeRange
+i O
+d O
+like O
+to O
+go O
+to O
+a O
+delaware B-state
+gastropub B-restaurant_type
+BookRestaurant
+
+what O
+movies B-movie_type
+are O
+playing O
+at O
+mann B-location_name
+theatres I-location_name
+SearchScreeningEvent
+
+find O
+a O
+movie B-object_type
+called O
+living B-object_name
+in I-object_name
+america I-object_name
+SearchCreativeWork
+
+find O
+on B-movie_name
+dress I-movie_name
+parade I-movie_name
+SearchScreeningEvent
+
+make O
+a O
+reservation O
+at O
+a O
+bakery B-restaurant_type
+that O
+has O
+acquacotta B-served_dish
+in O
+central B-country
+african I-country
+republic I-country
+for O
+five B-party_size_number
+BookRestaurant
+
+where O
+can O
+i O
+purchase O
+the O
+tv B-object_type
+show I-object_type
+time B-object_name
+for I-object_name
+heroes I-object_name
+SearchCreativeWork
+
+will O
+the O
+wind B-condition_description
+die O
+down O
+at O
+my O
+current B-current_location
+location I-current_location
+by O
+supper B-timeRange
+time O
+GetWeather
+
+please O
+search O
+the B-object_name
+young I-object_name
+warriors I-object_name
+game B-object_type
+SearchCreativeWork
+
+make O
+me O
+a O
+reservation O
+in O
+south B-state
+carolina I-state
+BookRestaurant
+
+what O
+movie B-object_location_type
+theatre I-object_location_type
+is O
+showing O
+if B-movie_name
+the I-movie_name
+huns I-movie_name
+came I-movie_name
+to I-movie_name
+melbourne I-movie_name
+SearchScreeningEvent
+
+restaurant B-restaurant_type
+in O
+bulgaria B-country
+this B-timeRange
+week I-timeRange
+party O
+for O
+9 B-party_size_number
+numbers O
+BookRestaurant
+
+rate O
+the O
+current B-object_select
+novel B-object_type
+four B-rating_value
+of O
+6 B-best_rating
+stars B-rating_unit
+RateBook
+
+add O
+the O
+song B-music_item
+don B-playlist
+t I-playlist
+drink I-playlist
+the I-playlist
+water I-playlist
+to O
+my B-playlist_owner
+playlist O
+AddToPlaylist
+
+add O
+this O
+tune B-music_item
+by O
+rod B-artist
+argent I-artist
+to O
+propuesta B-playlist
+alternativa I-playlist
+playlist O
+AddToPlaylist
+
+show O
+the O
+movie B-object_type
+times I-object_type
+SearchScreeningEvent
+
+will O
+it O
+snow B-condition_description
+in O
+amy B-city
+GetWeather
+
+what O
+will O
+the O
+weather O
+be O
+at O
+nine B-timeRange
+am I-timeRange
+in O
+hi B-state
+GetWeather
+
+in B-timeRange
+one I-timeRange
+hour I-timeRange
+find O
+king B-movie_name
+of I-movie_name
+hearts I-movie_name
+SearchScreeningEvent
