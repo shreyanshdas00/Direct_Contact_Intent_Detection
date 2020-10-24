@@ -1,6 +1,6 @@
 from utils.module import ModelManager
 from utils.loader import DatasetManager
-from process import Processor
+from utils.predict_process import Processor
 
 import torch
 
