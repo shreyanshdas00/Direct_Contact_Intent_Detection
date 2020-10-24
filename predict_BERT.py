@@ -1,6 +1,6 @@
 from utils_BERT.module import ModelManager
 from utils_BERT.loader import DatasetManager
-from utils.BERT.predict_process import Processor
+from utils_BERT.predict_process import Processor
 
 import torch
 
