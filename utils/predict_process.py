@@ -24,7 +24,6 @@ class Processor(object):
             self.__model = self.__model.cuda()
 
             time_con = time.time() - time_start
-            print("The model has been loaded into GPU and cost {:.6f} seconds.\n".format(time_con))
     @staticmethod
     def validate(model_path, dataset, batch_size):
         """
@@ -35,11 +34,10 @@ class Processor(object):
 
         # Get the sentence list in test dataset.
         #sent_list = dataset.test_sentence
-
-        confidence, pred_intent = Processor.prediction(
+        confidence, exp_pred_intent = Processor.prediction(
             model, dataset, "utterance", batch_size
         )
-        return confidence, pred_intent
+        return confidence, exp_pred_intent[0]
 
     @staticmethod
     def prediction(model, dataset, mode, batch_size):
@@ -49,9 +47,8 @@ class Processor(object):
             dataloader = dataset.batch_delivery('utterance', batch_size=batch_size, shuffle=False, is_digital=False)
         else:
             raise Exception("Argument error! mode belongs to {\"dev\", \"test\"}.")
-            
-        p, pred_intent, real_intent = 0,[], []
-        num_of_words = 0
+        pred_intent, real_intent = [], []
+        confidence = 0
 
         for text_batch, intent_batch in tqdm(dataloader, ncols=50):
             padded_text, [sorted_intent], seq_lens = dataset.add_padding(
@@ -62,25 +59,20 @@ class Processor(object):
 
             digit_text = dataset.word_alphabet.get_index(padded_text)
             var_text = Variable(torch.LongTensor(digit_text))
-
+            num_of_words = var_text.shape[1]
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
 
             intent_idx = model(var_text, seq_lens, n_predicts=1)
-            nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
-            pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
-
             intent_i = model(var_text, seq_lens)
             intent_i = torch.exp(intent_i)
-            p+=intent_i
-            num_of_words +=1
+            intent_i = torch.sum(intent_i,dim=0)/num_of_words
+            print(intent_i)
+            confidence, _ = intent_i.max(0,keepdims=False)
+            nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
+            pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
         exp_pred_intent = Evaluator.max_freq_predict(pred_intent)
-        p = (p/num_of_words).squeeze(0)
-        confidence, pred_intent = p.max(0,keepdims=False)
-        #pred_intent = dataset.intent_alphabet.get_instance(int(pred_intent))
-        return float(confidence*100), exp_pred_intent[0]
-        #return real_intent, pred_intent
-
+        return float(confidence)*100, exp_pred_intent
 
 class Evaluator(object):
     def max_freq_predict(sample):
