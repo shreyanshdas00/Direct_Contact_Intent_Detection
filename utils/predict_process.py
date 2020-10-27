@@ -50,7 +50,7 @@ class Processor(object):
         else:
             raise Exception("Argument error! mode belongs to {\"dev\", \"test\"}.")
             
-        pred_intent, real_intent = 0, []
+        p, pred_intent, real_intent = 0,[], []
         num_of_words = 0
 
         for text_batch, intent_batch in tqdm(dataloader, ncols=50):
@@ -66,19 +66,28 @@ class Processor(object):
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
 
-            intent_idx = model(var_text, seq_lens)
-            intent_idx = torch.exp(intent_idx)
-            pred_intent+=intent_idx
+            intent_idx = model(var_text, seq_lens, n_predicts=1)
+            nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
+            pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
+
+            intent_i = model(var_text, seq_lens)
+            intent_i = torch.exp(intent_i)
+            p+=intent_i
             num_of_words +=1
-        pred_intent = (pred_intent/num_of_words).squeeze(0)
-        confidence, pred_intent = pred_intent.max(0,keepdims=False)
-        pred_intent = dataset.intent_alphabet.get_instance(int(pred_intent))
-        return float(confidence*100), pred_intent
+        exp_pred_intent = Evaluator.max_freq_predict(pred_intent)
+        p = (p/num_of_words).squeeze(0)
+        confidence, pred_intent = p.max(0,keepdims=False)
+        #pred_intent = dataset.intent_alphabet.get_instance(int(pred_intent))
+        return float(confidence*100), exp_pred_intent[0]
         #return real_intent, pred_intent
 
 
 class Evaluator(object):
-
+    def max_freq_predict(sample):
+        predict = []
+        for items in sample:
+            predict.append(Counter(items).most_common(1)[0][0])
+        return predict
     @staticmethod
     def expand_list(nested_list):
         for item in nested_list:
@@ -87,3 +96,15 @@ class Evaluator(object):
                     yield sub_item
             else:
                 yield item
+    @staticmethod
+    def nested_list(items, seq_lens):
+        num_items = len(items)
+        trans_items = [[] for _ in range(0, num_items)]
+
+        count = 0
+        for jdx in range(0, len(seq_lens)):
+            for idx in range(0, num_items):
+                trans_items[idx].append(items[idx][count:count + seq_lens[jdx]])
+            count += seq_lens[jdx]
+
+        return trans_items
