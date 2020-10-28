@@ -37,7 +37,7 @@ class Processor(object):
         confidence, exp_pred_intent = Processor.prediction(
             model, dataset, "utterance", batch_size
         )
-        return confidence, exp_pred_intent[0]
+        return confidence, exp_pred_intent
 
     @staticmethod
     def prediction(model, dataset, mode, batch_size):
@@ -47,7 +47,7 @@ class Processor(object):
             dataloader = dataset.batch_delivery('utterance', batch_size=batch_size, shuffle=False, is_digital=False)
         else:
             raise Exception("Argument error! mode belongs to {\"dev\", \"test\"}.")
-        pred_intent, real_intent = [], []
+        pred_intent, real_intent = '', []
         confidence = 0
 
         for text_batch, intent_batch in tqdm(dataloader, ncols=50):
@@ -63,23 +63,15 @@ class Processor(object):
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
 
-            intent_idx = model(var_text, seq_lens, n_predicts=1)
-            intent_i = model(var_text, seq_lens)
-            intent_i = torch.exp(intent_i)
-            intent_i = torch.sum(intent_i,dim=0)/num_of_words
-            print(intent_i)
-            confidence, _ = intent_i.max(0,keepdims=False)
-            nested_intent = Evaluator.nested_list([list(Evaluator.expand_list(intent_idx))], seq_lens)[0]
-            pred_intent.extend(dataset.intent_alphabet.get_instance(nested_intent))
-        exp_pred_intent = Evaluator.max_freq_predict(pred_intent)
-        return float(confidence)*100, exp_pred_intent
+            intent_prob = model(var_text, seq_lens)
+            intent_prob = torch.exp(intent_prob)
+            intent_prob = torch.sum(intent_prob,dim=0)/num_of_words
+            confidence, intent_idx = intent_prob.max(0,keepdims=False)
+            pred_intent = dataset.intent_alphabet.get_instance(intent_idx.unsqueeze(0))
+        return float(confidence)*100, pred_intent[0]
 
 class Evaluator(object):
-    def max_freq_predict(sample):
-        predict = []
-        for items in sample:
-            predict.append(Counter(items).most_common(1)[0][0])
-        return predict
+    
     @staticmethod
     def expand_list(nested_list):
         for item in nested_list:
@@ -88,15 +80,3 @@ class Evaluator(object):
                     yield sub_item
             else:
                 yield item
-    @staticmethod
-    def nested_list(items, seq_lens):
-        num_items = len(items)
-        trans_items = [[] for _ in range(0, num_items)]
-
-        count = 0
-        for jdx in range(0, len(seq_lens)):
-            for idx in range(0, num_items):
-                trans_items[idx].append(items[idx][count:count + seq_lens[jdx]])
-            count += seq_lens[jdx]
-
-        return trans_items
