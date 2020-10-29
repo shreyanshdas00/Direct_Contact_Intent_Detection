@@ -25,12 +25,12 @@ class Processor(object):
 
             time_con = time.time() - time_start
     @staticmethod
-    def validate(model_path, dataset, batch_size):
+    def validate(model, model_path, dataset, batch_size):
         """
         validation will write mistaken samples to files and make scores.
         """
-
-        model = torch.load(model_path)
+        #model = torch.load(model_path)
+        model.load_state_dict(torch.load(model_path))
 
         # Get the sentence list in test dataset.
         #sent_list = dataset.test_sentence
