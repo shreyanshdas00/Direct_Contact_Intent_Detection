@@ -71,7 +71,7 @@ if __name__ == "__main__":
     process = Processor(dataset, model, args.batch_size)
     process.train()
 
-    print('\nAccepted performance: ' + str(Processor.validate(
-        os.path.join(args.save_dir, "model/model.pkl"),
+    print('\nAccepted performance: ' + str(Processor.validate( model,
+        os.path.join(args.save_dir, "model/model.pt"),
         os.path.join(args.save_dir, "model/dataset.pkl"),
         args.batch_size)) + " at test dataset;\n")
