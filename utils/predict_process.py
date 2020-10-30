@@ -29,8 +29,10 @@ class Processor(object):
         """
         validation will write mistaken samples to files and make scores.
         """
-        #model = torch.load(model_path)
-        model.load_state_dict(torch.load(model_path))
+        if torch.cuda.is_available():
+            model.load_state_dict(torch.load(model_path))
+        else:
+            model.load_state_dict(torch.load(model_path, map_location='cpu'))
 
         # Get the sentence list in test dataset.
         #sent_list = dataset.test_sentence
