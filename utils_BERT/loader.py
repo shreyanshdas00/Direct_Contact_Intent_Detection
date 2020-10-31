@@ -328,10 +328,11 @@ class DatasetManager(object):
                   elif len(items) == 2:
                       text.append(items[0])
         else:
-          items = file_path.strip().split()
+          items = file_path.split()
           for item in items:
-              texts.append([item.strip()])
-              intents.append("i_un")
+              text.append(item)
+          texts.append(text)
+          intents.append("i_un")
         return texts, intents
 
     def batch_delivery(self, data_name, batch_size=None, is_digital=True, shuffle=True):
