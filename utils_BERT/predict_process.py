@@ -26,12 +26,14 @@ class Processor(object):
             time_con = time.time() - time_start
             print("The model has been loaded into GPU and cost {:.6f} seconds.\n".format(time_con))
     @staticmethod
-    def validate(model_path, dataset, batch_size):
+    def validate(model, model_path, dataset, batch_size):
         """
         validation will write mistaken samples to files and make scores.
         """
-
-        model = torch.load(model_path)
+        if torch.cuda.is_available():
+            model.load_state_dict(torch.load(model_path))
+        else:
+            model.load_state_dict(torch.load(model_path, map_location='cpu'))
 
         # Get the sentence list in test dataset.
         #sent_list = dataset.test_sentence
@@ -63,20 +65,18 @@ class Processor(object):
             var_text, att_var = bert_tokenizer.tokenize(padded_text)
             var_text = Variable(torch.LongTensor(var_text))
             att_var = Variable(torch.LongTensor(att_var))
+            num_of_words = var_text.shape[1]
 
             if torch.cuda.is_available():
                 var_text = var_text.cuda()
                 att_var = att_var.cuda()
 
-            intent_idx = model(var_text, att_var, seq_lens)
-            intent_idx = torch.exp(intent_idx)
-            pred_intent+=intent_idx
-            num_of_words +=1
-        pred_intent = (pred_intent/num_of_words).squeeze(0)
-        confidence, pred_intent = pred_intent.max(0,keepdims=False)
-        pred_intent = dataset.intent_alphabet.get_instance(int(pred_intent))
-        return float(confidence*100), pred_intent
-        #return real_intent, pred_intent
+            intent_prob = model(var_text, att_var, seq_lens)
+            intent_prob = torch.exp(intent_prob)
+            intent_prob = torch.sum(intent_prob,dim=0)/num_of_words
+            confidence, intent_idx = intent_prob.max(0,keepdims=False)
+            pred_intent = dataset.intent_alphabet.get_instance(intent_idx.unsqueeze(0))
+        return float(confidence*100), pred_intent[0]
 
 
 class Evaluator(object):
