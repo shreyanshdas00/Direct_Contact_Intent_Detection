@@ -108,7 +108,7 @@ class Processor(object):
                 if not os.path.exists(model_save_dir):
                     os.mkdir(model_save_dir)
 
-                torch.save(self.__model, os.path.join(model_save_dir, "model.pkl"))
+                torch.save(self.__model.state_dict(), os.path.join(model_save_dir, "model.pt"))
                 torch.save(self.__dataset, os.path.join(model_save_dir, 'dataset.pkl'))
 
                 time_con = time.time() - time_start
@@ -136,12 +136,14 @@ class Processor(object):
         return intent_acc, sent_acc
 
     @staticmethod
-    def validate(model_path, dataset_path, batch_size):
+    def validate(model, model_path, dataset_path, batch_size):
         """
         validation will write mistaken samples to files and make scores.
         """
-
-        model = torch.load(model_path)
+        if torch.cuda.is_available():
+            model.load_state_dict(torch.load(model_path))
+        else:
+            model.load_state_dict(torch.load(model_path, map_location='cpu'))
         dataset = torch.load(dataset_path)
 
         # Get the sentence list in test dataset.
