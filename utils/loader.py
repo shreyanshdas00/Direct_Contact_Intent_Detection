@@ -315,13 +315,14 @@ class DatasetManager(object):
         texts, intents = [], []
         text = []
         if mode==0:
-            with open(file_path, 'r') as fr:
+            with open(file_path, 'r', errors = 'ignore') as fr:
                 for line in fr.readlines():
                     items = line.strip().split()
 
                     if len(items) == 1:
-                        texts.append(text)
-                        intents.append(items)
+                        if len(text)>0:
+                            texts.append(text)
+                            intents.append(items)
 
                         # clear buffer lists.
                         text = []
